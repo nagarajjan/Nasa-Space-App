@@ -141,7 +141,9 @@
           <h2 class="font-tech text-sm font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
             <i class="fa-solid fa-crosshairs"></i> Target NEO Catalog
           </h2>
-          <span class="text-[11px] font-mono text-slate-400 bg-space-800 px-2 py-0.5 rounded border border-slate-700">NASA JPL Tracked</span>
+          <span id="liveApiBadge" class="text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 bg-amber-500/10 text-amber-400 border-amber-500/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block"></span> Connecting...
+          </span>
         </div>
 
         <label class="block text-xs font-mono text-slate-400 mb-1">Select Potentially Hazardous Asteroid (PHA):</label>
@@ -154,6 +156,21 @@
           <option value="chelyabinsk">Chelyabinsk Superbolide (2013 Historic Impactor)</option>
           <option value="custom">-- Custom Asteroid (User Defined Physical & Orbital) --</option>
         </select>
+
+        <!-- Live NASA CAD API Feed Section -->
+        <div class="mt-3 space-y-1.5">
+          <div class="text-[10px] font-mono text-emerald-400 flex items-center gap-1.5 border-t border-slate-800 pt-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
+            🛰️ LIVE NASA JPL CAD — PHAs approaching Earth (next 365 days):
+          </div>
+          <select id="liveAsteroidSelect" class="w-full bg-space-900 border border-emerald-700/40 rounded-lg p-2 text-xs text-emerald-200 focus:outline-none focus:border-emerald-400 font-mono transition">
+            <option value="">⏳ Connecting to NASA JPL API...</option>
+          </select>
+          <div class="flex justify-between text-[10px] font-mono text-slate-500">
+            <span id="liveNeoCount">— PHAs fetched</span>
+            <span id="liveNeoUpdated">Last updated: —</span>
+          </div>
+        </div>
 
         <!-- Target Summary Pill Box -->
         <div class="mt-3 p-3 bg-space-900/80 rounded-lg border border-slate-800 font-mono text-xs space-y-1.5">
@@ -251,15 +268,89 @@
         </div>
       </div>
 
-      <!-- Quick Action / Preset Triggers -->
-      <div class="grid grid-cols-2 gap-2">
-        <button id="btnCenterEarth" class="px-3 py-2 bg-space-800 hover:bg-space-700 text-xs font-mono text-cyan-400 rounded-lg border border-cyan-500/30 transition flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-earth-americas"></i> Focus Earth
-        </button>
-        <button id="btnCenterAsteroid" class="px-3 py-2 bg-space-800 hover:bg-space-700 text-xs font-mono text-amber-400 rounded-lg border border-amber-500/30 transition flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-meteor"></i> Focus Target
-        </button>
+      <!-- 🪐 Planet / Moon System Focus Toggle -->
+      <div class="hud-panel rounded-xl p-3 border border-cyan-500/20">
+        <div class="text-[10px] font-tech font-bold uppercase tracking-wider text-cyan-400 mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-camera-rotate text-[9px]"></i> Focus View — Planet &amp; Moon Systems
+        </div>
+        <!-- Row 1: Inner Solar System -->
+        <div class="grid grid-cols-3 gap-1.5 mb-1.5">
+          <button id="focusSun" onclick="focusPlanetSystem('sun')"
+            class="planet-focus-btn px-1.5 py-1.5 bg-space-800 hover:bg-yellow-500/20 text-[10px] font-mono text-yellow-400 rounded border border-yellow-500/30 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">☀️</span><span>Sun</span>
+          </button>
+          <button id="focusMercury" onclick="focusPlanetSystem('mercury')"
+            class="planet-focus-btn px-1.5 py-1.5 bg-space-800 hover:bg-slate-500/20 text-[10px] font-mono text-slate-300 rounded border border-slate-600/40 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">☿</span><span>Mercury</span>
+          </button>
+          <button id="focusVenus" onclick="focusPlanetSystem('venus')"
+            class="planet-focus-btn px-1.5 py-1.5 bg-space-800 hover:bg-amber-200/10 text-[10px] font-mono text-amber-200 rounded border border-amber-300/30 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">♀</span><span>Venus</span>
+          </button>
+        </div>
+        <!-- Row 2: Earth system and Mars system -->
+        <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+          <button id="focusEarth" onclick="focusPlanetSystem('earth')"
+            class="planet-focus-btn active-focus px-1.5 py-2 bg-cyan-500/15 text-[10px] font-mono text-cyan-300 rounded border border-cyan-400/50 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">🌍</span>
+            <span class="font-bold">Earth</span>
+            <span class="text-[9px] text-slate-400">+ Luna</span>
+          </button>
+          <button id="focusMars" onclick="focusPlanetSystem('mars')"
+            class="planet-focus-btn px-1.5 py-2 bg-space-800 hover:bg-red-500/15 text-[10px] font-mono text-red-400 rounded border border-red-500/30 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">🔴</span>
+            <span class="font-bold">Mars</span>
+            <span class="text-[9px] text-slate-400">+ Phobos &amp; Deimos</span>
+          </button>
+        </div>
+        <!-- Row 3: Jupiter + Asteroid -->
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="focusJupiter" onclick="focusPlanetSystem('jupiter')"
+            class="planet-focus-btn px-1.5 py-2 bg-space-800 hover:bg-amber-500/15 text-[10px] font-mono text-amber-400 rounded border border-amber-500/30 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">♃</span>
+            <span class="font-bold">Jupiter</span>
+            <span class="text-[9px] text-slate-400">Io · Europa · Ganymede · Callisto</span>
+          </button>
+          <button id="focusNEO" onclick="focusPlanetSystem('neo')"
+            class="planet-focus-btn px-1.5 py-2 bg-space-800 hover:bg-amber-400/15 text-[10px] font-mono text-amber-300 rounded border border-amber-400/30 transition flex flex-col items-center gap-0.5">
+            <span class="text-base">☄️</span>
+            <span class="font-bold">NEO / Asteroid</span>
+            <span class="text-[9px] text-slate-400">Tracked target</span>
+          </button>
+        </div>
+        <!-- Row 4: Moons of Mars sub-toggle -->
+        <div id="marsSubToggle" class="hidden mt-1.5 grid grid-cols-2 gap-1.5">
+          <button onclick="focusMoon('phobos')"
+            class="px-1.5 py-1 bg-stone-900/60 hover:bg-stone-700/40 text-[9px] font-mono text-stone-300 rounded border border-stone-600/40 transition">
+            🪨 Phobos (Inner)
+          </button>
+          <button onclick="focusMoon('deimos')"
+            class="px-1.5 py-1 bg-slate-900/60 hover:bg-slate-700/40 text-[9px] font-mono text-slate-300 rounded border border-slate-600/40 transition">
+            🪨 Deimos (Outer)
+          </button>
+        </div>
+        <!-- Row 5: Galilean moons sub-toggle -->
+        <div id="jupiterSubToggle" class="hidden mt-1.5 grid grid-cols-2 gap-1.5">
+          <button onclick="focusMoon('io')"
+            class="px-1.5 py-1 bg-yellow-950/60 hover:bg-yellow-800/30 text-[9px] font-mono text-yellow-300 rounded border border-yellow-600/30 transition">
+            🌋 Io
+          </button>
+          <button onclick="focusMoon('europa')"
+            class="px-1.5 py-1 bg-sky-950/60 hover:bg-sky-800/30 text-[9px] font-mono text-sky-200 rounded border border-sky-600/30 transition">
+            🧊 Europa
+          </button>
+          <button onclick="focusMoon('ganymede')"
+            class="px-1.5 py-1 bg-slate-900/60 hover:bg-slate-700/40 text-[9px] font-mono text-slate-300 rounded border border-slate-600/40 transition">
+            🌑 Ganymede
+          </button>
+          <button onclick="focusMoon('callisto')"
+            class="px-1.5 py-1 bg-gray-950/60 hover:bg-gray-700/40 text-[9px] font-mono text-gray-400 rounded border border-gray-700/40 transition">
+            🌑 Callisto
+          </button>
+        </div>
       </div>
+
+
 
     </section>
 
@@ -1521,11 +1612,171 @@
     }
 
     /* =========================================================================
+       4b. LIVE NASA API INTEGRATION
+       — NASA JPL Close-Approach Data (CAD) API: no key required
+       — NASA JPL SBDB (Small-Body Database) API: orbital elements fetch
+       ========================================================================= */
+
+    /**
+     * Fetches the current list of Potentially Hazardous Asteroids (PHAs)
+     * with close approaches to Earth in the next 365 days from NASA JPL.
+     * Source: https://ssd-api.jpl.nasa.gov/cad.api
+     */
+    async function fetchLiveNASAData() {
+      const badge = document.getElementById('liveApiBadge');
+      const liveSelect = document.getElementById('liveAsteroidSelect');
+      const countEl = document.getElementById('liveNeoCount');
+      const updatedEl = document.getElementById('liveNeoUpdated');
+
+      // Build date window: today → today+365
+      const now = new Date();
+      const future = new Date(now);
+      future.setDate(future.getDate() + 365);
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      const CAD_URL = `https://ssd-api.jpl.nasa.gov/cad.api?dist-max=0.2&date-min=${fmt(now)}&date-max=${fmt(future)}&pha=true&sort=dist&limit=60&fields=des,cd,dist,v-rel,diameter`;
+
+      try {
+        const resp = await fetch(CAD_URL, { signal: AbortSignal.timeout(12000) });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+
+        const rows = data.data || [];
+        if (rows.length === 0) {
+          liveSelect.innerHTML = '<option value="">No PHAs found in next 365 days</option>';
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span> 0 PHAs`;
+          badge.className = badge.className.replace('amber', 'yellow');
+          return;
+        }
+
+        // Populate the live dropdown
+        liveSelect.innerHTML = '<option value="">— Select a live NASA-tracked PHA —</option>';
+        rows.forEach(row => {
+          // CAD fields: des, cd, dist, v-rel, diameter
+          const des = row[0];
+          const cd = row[1];   // close-approach date
+          const dist = parseFloat(row[2]).toFixed(4);
+          const vrel = parseFloat(row[3]).toFixed(2);
+          const diam = row[4] ? `~${(parseFloat(row[4]) * 1000).toFixed(0)}m` : '?m';
+          const dateStr = cd ? cd.slice(0, 10) : '?';
+          const opt = document.createElement('option');
+          opt.value = des;
+          opt.dataset.dist = dist;
+          opt.dataset.vrel = vrel;
+          opt.dataset.diam = row[4] ? (parseFloat(row[4]) * 1000).toFixed(0) : 200;
+          opt.textContent = `${des} | ${dateStr} | ${dist} AU | ${vrel} km/s | ${diam}`;
+          liveSelect.appendChild(opt);
+        });
+
+        // Update badge → green LIVE
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span> LIVE — NASA JPL`;
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/40';
+
+        countEl.textContent = `${rows.length} PHAs tracked (next 365 days)`;
+        updatedEl.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+
+      } catch (err) {
+        // CORS / network failure — show fallback message
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block"></span> API Offline`;
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 bg-red-500/10 text-red-400 border-red-500/40';
+        liveSelect.innerHTML = `<option value="">⚠️ NASA JPL API unreachable (${err.message}) — use curated list above</option>`;
+        countEl.textContent = 'Using local curated database';
+        console.warn('[AEGIS-NEO] NASA CAD API error:', err);
+      }
+    }
+
+    /**
+     * When a live PHA is selected from the NASA JPL feed, fetch its
+     * full orbital elements from the SBDB API and load into the simulator.
+     */
+    async function fetchSBDBOrbitalElements(designation) {
+      const encoded = encodeURIComponent(designation);
+      const SBDB_URL = `https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=${encoded}&orb=1&phys=1`;
+      try {
+        const resp = await fetch(SBDB_URL, { signal: AbortSignal.timeout(10000) });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+
+        const orb = data.orbit && data.orbit.elements ? data.orbit.elements : null;
+        const phys = data.phys_par || {};
+
+        if (orb) {
+          // Parse Keplerian elements
+          const getEl = name => {
+            const el = orb.find(e => e.name === name || e.label === name);
+            return el ? parseFloat(el.value) : null;
+          };
+
+          const a = getEl('a') || currentAsteroid.semiMajor;
+          const e = getEl('e') || currentAsteroid.eccentricity;
+          const inc = getEl('i') || currentAsteroid.inclination;
+          const w = getEl('w') || currentAsteroid.argPerihelion || 0;
+          const om = getEl('om') || currentAsteroid.longAscNode || 0;
+
+          // Physical params (diameter in km from SBDB)
+          const diamKm = phys.diameter ? parseFloat(phys.diameter.value) : null;
+          const diamM = diamKm ? Math.round(diamKm * 1000) : currentAsteroid.diameter;
+          const moid = phys.moid ? parseFloat(phys.moid.value) : currentAsteroid.moid;
+
+          // Update currentAsteroid with live orbital elements
+          currentAsteroid = {
+            name: data.object ? data.object.fullname : designation,
+            spectral: (data.object && data.object.spec_T) ? data.object.spec_T : 'Unknown',
+            class: (data.object && data.object.class) ? data.object.class : 'NEO',
+            diameter: diamM,
+            velocity: currentAsteroid.velocity, // from CAD selection
+            semiMajor: a,
+            eccentricity: e,
+            inclination: inc,
+            argPerihelion: w,
+            longAscNode: om,
+            density: currentAsteroid.density,
+            moid: moid || currentAsteroid.moid,
+            torino: 0,
+            palermo: -3
+          };
+
+          // Sync sliders & displays
+          document.getElementById('sliderDiameter').value = diamM;
+          document.getElementById('valDiameter').innerText = `${diamM} m`;
+          document.getElementById('sliderSemiMajor').value = a.toFixed(3);
+          document.getElementById('valSemiMajor').innerText = `${a.toFixed(3)} AU`;
+          document.getElementById('sliderEccentricity').value = e.toFixed(3);
+          document.getElementById('valEccentricity').innerText = e.toFixed(3);
+          document.getElementById('sliderInclination').value = inc.toFixed(2);
+          document.getElementById('valInclination').innerText = `${inc.toFixed(2)}°`;
+
+          document.getElementById('dispClass').innerText = currentAsteroid.class || 'NEO';
+          document.getElementById('dispDiameter').innerText = `${diamM} meters`;
+          document.getElementById('dispVelocity').innerText = `${currentAsteroid.velocity} km/s`;
+          document.getElementById('dispMOID').innerText = `${moid.toFixed(5)} AU (${Math.round(moid * 149597870.7).toLocaleString()} km)`;
+          document.getElementById('legendAsteroidName').innerText = `${currentAsteroid.name} Orbit`;
+
+          const q = (a * (1 - e)).toFixed(3);
+          const Q = (a * (1 + e)).toFixed(3);
+          const period = (Math.pow(a, 1.5) * 365.25).toFixed(1);
+          document.getElementById('calcPerihelion').innerText = `${q} AU`;
+          document.getElementById('calcAphelion').innerText = `${Q} AU`;
+          document.getElementById('calcPeriod').innerText = `${period} Days`;
+          document.getElementById('calcOrbitClass').innerText = currentAsteroid.class.split(' ')[0] + ' Class';
+
+          rebuildAsteroidOrbit();
+          updateAsteroidLabel();
+          recalculatePhysics();
+        }
+      } catch (err) {
+        console.warn('[AEGIS-NEO] SBDB API error for', designation, err);
+        // Fall back to velocity/diameter from the CAD selection alone
+      }
+    }
+
+    /* =========================================================================
        5. EVENT LISTENERS & UI INTERACTIVITY
        ========================================================================= */
     document.addEventListener('DOMContentLoaded', () => {
       init3D();
       recalculatePhysics();
+      fetchLiveNASAData(); // 🛰️ Live NASA JPL CAD API — close approach PHAs
 
       // Asteroid Selection Dropdown
       const select = document.getElementById('asteroidSelect');
@@ -1570,6 +1821,19 @@
           updateAsteroidLabel();
           recalculatePhysics();
         }
+      });
+
+      // 🛰️ Live NASA JPL CAD dropdown → fetch full SBDB orbital elements
+      document.getElementById('liveAsteroidSelect').addEventListener('change', (e) => {
+        const des = e.target.value;
+        if (!des) return;
+        const opt = e.target.options[e.target.selectedIndex];
+        // Pre-fill velocity from CAD data while SBDB loads
+        currentAsteroid.velocity = parseFloat(opt.dataset.vrel) || currentAsteroid.velocity;
+        currentAsteroid.diameter = parseFloat(opt.dataset.diam) || currentAsteroid.diameter;
+        // Deselect curated dropdown
+        document.getElementById('asteroidSelect').value = '';
+        fetchSBDBOrbitalElements(des);
       });
 
       // Interactive Sliders
@@ -1666,16 +1930,108 @@
         e.currentTarget.innerHTML = isSimPlaying ? '<i class="fa-solid fa-pause text-base"></i>' : '<i class="fa-solid fa-play text-base"></i>';
       });
 
-      // Camera view focus
-      document.getElementById('btnCenterEarth').addEventListener('click', () => {
-        controls.target.copy(earthMesh.position);
-        camera.position.set(earthMesh.position.x, earthMesh.position.y + 15, earthMesh.position.z + 25);
-      });
 
-      document.getElementById('btnCenterAsteroid').addEventListener('click', () => {
-        controls.target.copy(asteroidMesh.position);
-        camera.position.set(asteroidMesh.position.x, asteroidMesh.position.y + 15, asteroidMesh.position.z + 25);
-      });
+      // ── Planet / Moon System Focus Functions ──────────────────────────────────
+
+      /**
+       * focusPlanetSystem(key): Moves camera to focus on a planet and reveals moon sub-toggles.
+       * Highlights the active button and hides/shows relevant sub-toggle rows.
+       */
+      window.focusPlanetSystem = function(key) {
+        // Clear active state from all planet-focus buttons
+        document.querySelectorAll('.planet-focus-btn').forEach(b => {
+          b.classList.remove('active-focus', 'bg-cyan-500/15', 'border-cyan-400/50',
+            'bg-red-500/15', 'border-red-500/50', 'bg-amber-500/15', 'border-amber-400/50');
+        });
+
+        // Hide all sub-toggles
+        document.getElementById('marsSubToggle').classList.add('hidden');
+        document.getElementById('jupiterSubToggle').classList.add('hidden');
+
+        let targetMesh, camDist, camHeight;
+
+        switch(key) {
+          case 'sun':
+            document.getElementById('focusSun').classList.add('active-focus', 'bg-yellow-500/20');
+            controls.target.set(0, 0, 0);
+            camera.position.set(0, 80, 130);
+            controls.update();
+            return;
+
+          case 'mercury':
+            document.getElementById('focusMercury').classList.add('active-focus');
+            targetMesh = mercuryMesh; camDist = 20; camHeight = 8;
+            break;
+
+          case 'venus':
+            document.getElementById('focusVenus').classList.add('active-focus');
+            targetMesh = venusMesh; camDist = 22; camHeight = 10;
+            break;
+
+          case 'earth':
+            document.getElementById('focusEarth').classList.add('active-focus', 'bg-cyan-500/15', 'border-cyan-400/50');
+            targetMesh = earthMesh; camDist = 22; camHeight = 10;
+            break;
+
+          case 'mars':
+            document.getElementById('focusMars').classList.add('active-focus', 'bg-red-500/15', 'border-red-500/50');
+            document.getElementById('marsSubToggle').classList.remove('hidden');
+            targetMesh = marsMesh; camDist = 22; camHeight = 10;
+            break;
+
+          case 'jupiter':
+            document.getElementById('focusJupiter').classList.add('active-focus', 'bg-amber-500/15', 'border-amber-400/50');
+            document.getElementById('jupiterSubToggle').classList.remove('hidden');
+            targetMesh = jupiterMesh; camDist = 55; camHeight = 22;
+            break;
+
+          case 'neo':
+            document.getElementById('focusNEO').classList.add('active-focus', 'bg-amber-400/15');
+            targetMesh = asteroidMesh; camDist = 25; camHeight = 12;
+            break;
+
+          default:
+            return;
+        }
+
+        if (targetMesh) {
+          const wp = new THREE.Vector3();
+          targetMesh.getWorldPosition(wp);
+          controls.target.copy(wp);
+          camera.position.set(wp.x + camDist * 0.6, wp.y + camHeight, wp.z + camDist);
+          controls.update();
+        }
+      };
+
+      /**
+       * focusMoon(moon): Zoom into a specific moon. Requires parent planet to already be focused.
+       */
+      window.focusMoon = function(moon) {
+        const moonMap = {
+          phobos: { mesh: phobosMesh, dist: 8, height: 3 },
+          deimos: { mesh: deimosMesh, dist: 10, height: 3 },
+          luna:   { mesh: moonMesh,   dist: 10, height: 4 },
+          io:     { mesh: ioMesh,     dist: 12, height: 4 },
+          europa: { mesh: europaMesh, dist: 12, height: 4 },
+          ganymede: { mesh: ganymedeMesh, dist: 14, height: 5 },
+          callisto: { mesh: callistoMesh, dist: 16, height: 5 },
+        };
+
+        const entry = moonMap[moon];
+        if (!entry || !entry.mesh) return;
+        const wp = new THREE.Vector3();
+        entry.mesh.getWorldPosition(wp);
+        controls.target.copy(wp);
+        camera.position.set(wp.x + entry.dist * 0.5, wp.y + entry.height, wp.z + entry.dist);
+        controls.update();
+      };
+
+      // Also keep original header buttons wired (now delegates to focusPlanetSystem)
+      const _e = document.getElementById('btnCenterEarth');
+      if (_e) _e.addEventListener('click', () => focusPlanetSystem('earth'));
+      const _a = document.getElementById('btnCenterAsteroid');
+      if (_a) _a.addEventListener('click', () => focusPlanetSystem('neo'));
+
 
       // Pitch Deck Modal
       const pitchModal = document.getElementById('pitchModal');
