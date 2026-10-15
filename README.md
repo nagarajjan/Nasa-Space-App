@@ -69,6 +69,19 @@ Click the **"Pitch Deck Outline"** button directly inside the app header to view
 | **Slide 6** | **Global Policy & Civil Protection Integration** | Practical Real-world Value |
 | **Slide 7** | **Roadmap & Open Science Community** | Scalability & Open Source Commitment (15%) |
 
+## 📚 Documentation Suite & Hackathon Deliverables
+
+All mission documentation, pitch assets, and scientific references are available in the [`docs/`](docs/) directory:
+
+| Document | Description | Direct Link |
+| :--- | :--- | :--- |
+| **Pitch Deck & Script** | Official 4-minute, 7-slide presentation deck with verbatim 30s speaker scripts | [docs/PITCH_DECK.md](docs/PITCH_DECK.md) |
+| **Scientific Methodology** | Keplerian solvers, Collins crater scaling laws, overpressure blast envelopes, and DART physics | [docs/SCIENTIFIC_METHODOLOGY.md](docs/SCIENTIFIC_METHODOLOGY.md) |
+| **NASA Data Integration** | Complete technical guide to NASA JPL SBDB, NeoWs, CNEOS Sentry, and DART telemetry | [docs/NASA_DATA_INTEGRATION.md](docs/NASA_DATA_INTEGRATION.md) |
+| **Judges' Q&A Cheat Sheet** | Expert defense answers to the toughest technical and policy questions from hackathon judges | [docs/JUDGES_QA_CHEAT_SHEET.md](docs/JUDGES_QA_CHEAT_SHEET.md) |
+| **Solution Master Dossier** | Comprehensive planetary defense executive dossier and systems architecture | [docs/SOLUTION_DOSSIER.md](docs/SOLUTION_DOSSIER.md) |
+| **Execution Playbook** | 90-second live demo click-path, submission portal copy, and multi-cloud deployment guides | [docs/PLAYBOOK.md](docs/PLAYBOOK.md) |
+
 ---
 
 ## 📡 NASA APIs & Datasets Integrated
@@ -81,3 +94,4 @@ Click the **"Pitch Deck Outline"** button directly inside the app header to view
 
 ## 📄 License
 This project is licensed under the MIT License - built for the NASA International Space Apps Challenge.
+
