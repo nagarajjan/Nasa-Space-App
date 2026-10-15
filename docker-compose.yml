@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  aegis-planetary-defense:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegis_neo_platform
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    labels:
+      - "org.opencontainers.image.title=AEGIS-NEO"
+      - "org.opencontainers.image.description=NASA Space Apps Planetary Defense Platform"
